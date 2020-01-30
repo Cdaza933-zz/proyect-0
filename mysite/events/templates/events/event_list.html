@@ -1,0 +1,99 @@
+<script src="//code.jquery.com/jquery-3.3.1.min.js"></script>
+{% block content %}
+{% csrf_token %}
+
+<h3 align=“center”>Event List</h3>​
+<style>
+    .parent{
+        height: 40%;
+        width: 40%;
+        border-style: solid;
+        border-color: black;
+    }
+
+    .parent > img {
+        top: 50%;
+        left: 50%;
+        height: 100%;
+        width: 34%;
+        float: left;
+        margin-right: 6%;
+
+    }
+    .parent > div {
+        height: 100%;
+        width: 100%;
+
+    }
+    ul {
+        margin: 1%;
+    }
+    a.button {
+        -webkit-appearance: button;
+        -moz-appearance: button;
+        appearance: button;
+
+        text-decoration: none;
+        color: initial;
+    }
+</style>
+<ul>
+    {% for event in events_list %}
+
+    <div class="parent">
+        {% if event.image %}
+        <img src="{{ event.image }}" />
+        {% else %}
+        <img src="https://image.shutterstock.com/z/stock-vector-no-image-available-sign-internet-web-icon-to-indicate-the-absence-of-image-until-it-will-be-261719003.jpg"/>
+        {% endif %}
+        <div>
+            <p>Name:<a>{{ event.name }}</a></p></p>
+            <p>Place: {{ event.place }}</p>
+            <p>Beginning date:  {{ event.beginning_date }} </p>
+            <p>End date: {{ event.end_date }}</p>
+            <button onclick="deleteEvent(this.value)" value="{{ event.id}}">Delete event</button>
+            <input type="button" onclick="location.href='{{event.id}}';" value="Edit event" />
+        </div>
+    </div>
+    {% endfor %}
+</ul>
+
+<a href="/events/add">add image</a>
+{% endblock content %}
+<script>
+    var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+    function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+    });
+    function deleteEvent(event_id) {
+        $.ajax({
+            type: "DELETE",
+            url: "/events/"+ event_id +"/delete",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+
+            success: function(data) {
+                if(data.message == "ok")
+                {
+                    window.location = "/events/";
+                }
+                else
+                {
+                    alert(data.message);
+                }
+            },
+            failure: function(errMsg) {
+                alert("something went wrong with the delete");
+            }
+        });
+        return false;
+    }
+</script>
